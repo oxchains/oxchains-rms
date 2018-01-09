@@ -1,5 +1,6 @@
 package com.oxchains.rmsuser.auth;
 
+import org.omg.PortableServer.SERVANT_RETENTION_POLICY_ID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -29,6 +30,10 @@ public class JwtTokenFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest servletRequest = (HttpServletRequest) request;
         String authorization = servletRequest.getHeader(AuthorizationConst.AUTHORIZATION_HEADER);
+
+        // TODO 获取请求url
+
+
         System.out.println("auth-token=" + authorization);
         if (authorization != null && authorization.startsWith(AuthorizationConst.AUTHORIZATION_START)) {
             jwtService
