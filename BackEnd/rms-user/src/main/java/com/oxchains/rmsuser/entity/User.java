@@ -128,6 +128,7 @@ public class User {
         this.enabled = enabled;
     }
 
+
     public User(User user){
         //setRoleId(user.getRoleId());
         setEmail(user.getEmail());
