@@ -20,4 +20,13 @@ public class Permission {
     private String name;
     private String description;
     private String url;
+
+    public Permission(String name, String description, String url) {
+        this.name = name;
+        this.description = description;
+        this.url = url;
+    }
+
+    public Permission() {
+    }
 }

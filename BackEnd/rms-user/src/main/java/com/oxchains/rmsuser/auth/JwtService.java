@@ -1,7 +1,9 @@
 package com.oxchains.rmsuser.auth;
 
 import com.alibaba.fastjson.JSON;
+import com.oxchains.rmsuser.dao.PermissionRepo;
 import com.oxchains.rmsuser.dao.UserRepo;
+import com.oxchains.rmsuser.entity.Permission;
 import com.oxchains.rmsuser.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -15,6 +17,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -51,8 +54,10 @@ public class JwtService {
     private PrivateKey privateKey;
     private PublicKey publicKey;
 
-    private final UserRepo userRepo;
+    @Resource
+    PermissionRepo permissionRepo;
 
+    private final UserRepo userRepo;
 
     public JwtService(UserRepo userRepo) {
         this.userRepo = userRepo;
@@ -86,7 +91,7 @@ public class JwtService {
                 compact();
     }
 
-    Optional<JwtAuthentication> parse(String token) {
+    Optional<JwtAuthentication> parse(String token, String uri) {
         User user = null;
         try {
             Jws<Claims> jws = new DefaultJwtParser()
@@ -96,7 +101,12 @@ public class JwtService {
             String subject=claims.getSubject();
             user = userRepo.findByLoginname(subject);
             JwtAuthentication jwtAuthentication = new JwtAuthentication(user, token, claims);
-            return Optional.of(jwtAuthentication);
+
+            Permission permission = permissionRepo.findByUrl(uri);
+            if (permission != null){
+                return Optional.of(jwtAuthentication);
+            }
+            return empty();
         } catch (Exception e) {
             LOG.error("failed to parse jwt token {}: ", token, e);
         }

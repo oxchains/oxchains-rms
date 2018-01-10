@@ -30,14 +30,12 @@ public class JwtTokenFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest servletRequest = (HttpServletRequest) request;
         String authorization = servletRequest.getHeader(AuthorizationConst.AUTHORIZATION_HEADER);
-
-        // TODO 获取请求url
-
-
+        String uri = servletRequest.getRequestURI();
+        System.out.println("request uri=" + uri);
         System.out.println("auth-token=" + authorization);
         if (authorization != null && authorization.startsWith(AuthorizationConst.AUTHORIZATION_START)) {
             jwtService
-                    .parse(authorization.replaceAll(AuthorizationConst.AUTHORIZATION_START, ""))
+                    .parse(authorization.replaceAll(AuthorizationConst.AUTHORIZATION_START, ""), uri)
                     .ifPresent(jwtAuthentication -> SecurityContextHolder
                             .getContext()
                             .setAuthentication(jwtAuthentication));

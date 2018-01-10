@@ -3,6 +3,7 @@ package com.oxchains.rmsuser.entity;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.List;
 
 /**
  * @author luoxuri
@@ -20,4 +21,16 @@ public class Menu {
     private String name;
     private String description;
     private Long pid;
+
+    @Transient
+    private List<Menu> childMenu;
+
+    public Menu() {
+    }
+
+    public Menu(String name, String description, Long pid) {
+        this.name = name;
+        this.description = description;
+        this.pid = pid;
+    }
 }
