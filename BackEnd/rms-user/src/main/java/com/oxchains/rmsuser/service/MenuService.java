@@ -139,23 +139,46 @@ public class MenuService {
         return RestResp.fail("操作失败");
     }
 
-    /*public RestResp authMenu(Long menuId, Long toId){
+    public RestResp authMenu(Long menuId, Long toId){
         try {
-            Menu menu = menuRepo.findOne(menuId);
-
-            Long pid = menu.getPid();
-            if (!pid.equals(0L)){
-
-            }
-
             List<UserRole> userRoleList = userRoleRepo.findByUserId(toId);
+            Set<Long> roleSet = new HashSet<>();
             userRoleList.stream().forEach(ur -> {
-
+                // 选中user所属角色roleId
+                Long roleId = ur.getRoleId();
+                roleSet.add(roleId);
             });
+
+            // 按照menuId加权限
+            Menu menu = menuRepo.findOne(menuId);
+            MenuRole menuRole = new MenuRole();
+            MenuRole menuRole2 = new MenuRole();
+            Iterator<Long> it = roleSet.iterator();
+
+            while (it.hasNext()){
+                Long roleId = it.next();
+                MenuRole mr = menuRoleRepo.findByMenuIdAndRoleId(menuId, roleId);
+                if (mr == null){
+                    menuRole.setMenuId(menuId);
+                    menuRole.setRoleId(roleId);
+                    menuRoleRepo.save(menuRole);
+
+                    // 是否有pid,有pid将pid=id菜单加上
+                    Long pid = menu.getPid();
+                    if (!pid.equals(0L)) {
+                        MenuRole menuRole1 = menuRoleRepo.findOne(pid);
+                        Long menuId1 = menuRole1.getId();// fuId
+                        menuRole2.setMenuId(menuId1);
+                        menuRole2.setRoleId(roleId);
+                        menuRoleRepo.save(menuRole2);
+                    }
+                }
+            }
+            return RestResp.success("操作成功", toId);
         } catch (Exception e){
             LOG.error("auth menu failed: {}", e.getMessage(), e);
         }
         return RestResp.fail("操作失败");
-    }*/
+    }
 
 }

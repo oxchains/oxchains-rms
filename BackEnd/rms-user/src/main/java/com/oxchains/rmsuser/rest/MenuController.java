@@ -24,7 +24,7 @@ public class MenuController {
         return menuService.menuList(userId);
     }
 
-    @GetMapping(value = "/list/admin")
+    @GetMapping(value = "/adminList")
     public RestResp adminMenuList(){
         return menuService.adminMenuList();
     }
@@ -42,6 +42,11 @@ public class MenuController {
     @GetMapping(value = "/update/{menuId}/{name}")
     public RestResp updateMenu(@PathVariable Long menuId, @PathVariable String name){
         return menuService.updateMenu(menuId, name);
+    }
+
+    @GetMapping(value = "/authMenu/{menuId}/{toId}")
+    public RestResp authMenu(@PathVariable Long menuId, @PathVariable Long toId){
+        return menuService.authMenu(menuId, toId);
     }
 
 }

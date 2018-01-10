@@ -16,4 +16,5 @@ import java.util.List;
 public interface RolePermissionRepo extends CrudRepository<RolePermission,Long> {
 
     List<RolePermission> findByRoleId(Long roleId);
+    RolePermission findByRoleIdAndPermissionId(Long roleId, Long permissionId);
 }

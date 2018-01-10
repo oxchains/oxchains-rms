@@ -17,4 +17,5 @@ import java.util.List;
 public interface MenuRoleRepo extends CrudRepository<MenuRole,Long> {
 
     List<MenuRole> findByRoleId(Long roleId);
+    MenuRole findByMenuIdAndRoleId(Long menuId, Long roleId);
 }

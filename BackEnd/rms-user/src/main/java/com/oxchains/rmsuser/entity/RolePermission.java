@@ -24,4 +24,7 @@ public class RolePermission {
         this.roleId = roleId;
         this.permissionId = permissionId;
     }
+
+    public RolePermission() {
+    }
 }

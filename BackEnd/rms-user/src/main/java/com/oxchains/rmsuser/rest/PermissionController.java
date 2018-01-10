@@ -32,8 +32,13 @@ public class PermissionController {
         return permissionService.updateURI(permissionId, permission);
     }
 
-    @GetMapping("/query/all")
+    @GetMapping("/queryAll")
     public RestResp queryAllURI(){
         return permissionService.queryAllURI();
+    }
+
+    @GetMapping("/authUri/{permissionId}/{toId}")
+    public RestResp authURI(@PathVariable Long permissionId, @PathVariable Long toId){
+        return permissionService.authURI(permissionId, toId);
     }
 }
