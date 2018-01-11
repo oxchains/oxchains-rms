@@ -19,4 +19,12 @@ public class MenuRole {
 
     private Long menuId;
     private Long roleId;
+
+    public MenuRole(Long menuId, Long roleId) {
+        this.menuId = menuId;
+        this.roleId = roleId;
+    }
+
+    public MenuRole() {
+    }
 }

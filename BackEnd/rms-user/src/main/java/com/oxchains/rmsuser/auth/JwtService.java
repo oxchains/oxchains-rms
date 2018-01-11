@@ -1,8 +1,15 @@
 package com.oxchains.rmsuser.auth;
 
 import com.alibaba.fastjson.JSON;
+import com.oxchains.rmsuser.common.IndexUtils;
+import com.oxchains.rmsuser.dao.PermissionRepo;
+import com.oxchains.rmsuser.dao.RolePermissionRepo;
 import com.oxchains.rmsuser.dao.UserRepo;
+import com.oxchains.rmsuser.dao.UserRoleRepo;
+import com.oxchains.rmsuser.entity.Permission;
+import com.oxchains.rmsuser.entity.RolePermission;
 import com.oxchains.rmsuser.entity.User;
+import com.oxchains.rmsuser.entity.UserRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -15,6 +22,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -22,9 +30,9 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPrivateKey;
 import java.time.ZonedDateTime;
-import java.util.Date;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.util.Optional.empty;
 
@@ -51,8 +59,11 @@ public class JwtService {
     private PrivateKey privateKey;
     private PublicKey publicKey;
 
-    private final UserRepo userRepo;
+    @Resource private PermissionRepo permissionRepo;
+    @Resource private UserRoleRepo userRoleRepo;
+    @Resource private RolePermissionRepo rolePermissionRepo;
 
+    private final UserRepo userRepo;
 
     public JwtService(UserRepo userRepo) {
         this.userRepo = userRepo;
@@ -80,13 +91,13 @@ public class JwtService {
     public String generate(User user) {
         return new DefaultJwtBuilder().
                 setId(UUID.randomUUID().toString()).
-                setSubject(user.getId().toString()).
+                setSubject(user.getLoginname()).
                 setExpiration(Date.from(ZonedDateTime.now().plusWeeks(1).toInstant())).claim("id", user.getId()).claim("email", user.getEmail()).claim("monilephone",user.getMobilephone()).claim("loginname",user.getLoginname()).
                 signWith(SignatureAlgorithm.ES256, privateKey).
                 compact();
     }
 
-    Optional<JwtAuthentication> parse(String token) {
+    Optional<JwtAuthentication> parse(String token, String uri) {
         User user = null;
         try {
             Jws<Claims> jws = new DefaultJwtParser()
@@ -96,12 +107,41 @@ public class JwtService {
             String subject=claims.getSubject();
             user = userRepo.findByLoginname(subject);
             JwtAuthentication jwtAuthentication = new JwtAuthentication(user, token, claims);
-            return Optional.of(jwtAuthentication);
+
+            // 1.权限表没有这个url就放行
+            int index = IndexUtils.getIndex(uri, "/");
+            String subUri = uri.substring(0, index);
+            Permission permission = permissionRepo.findByUrl(subUri);
+            if (permission == null){
+                return Optional.of(jwtAuthentication);
+            }
+
+            // 2.有url,判断user权限
+            // 获取roleId
+            Long userId = user.getId();
+            List<UserRole> userRoleList = userRoleRepo.findByUserId(userId);
+            Set<Long> roleSet = new HashSet<>();
+            userRoleList.stream().forEach(ur -> {
+                roleSet.add(ur.getRoleId());
+            });
+
+            Iterator<Long> it = roleSet.iterator();
+            List<RolePermission> list = new ArrayList<>();
+            while (it.hasNext()){
+                Long roleId = it.next();
+                RolePermission rolePermission = rolePermissionRepo.findByRoleIdAndPermissionId(roleId, permission.getId());
+                if (rolePermission != null){
+                    list.add(rolePermission);
+                }
+            }
+            if (list.size() != 0){
+                return Optional.of(jwtAuthentication);
+            }
+            return empty();
         } catch (Exception e) {
             LOG.error("failed to parse jwt token {}: ", token, e);
         }
         return empty();
     }
-
 
 }

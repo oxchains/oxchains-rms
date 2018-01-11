@@ -19,4 +19,12 @@ public class RolePermission {
 
     private Long roleId;
     private Long permissionId;
+
+    public RolePermission(Long roleId, Long permissionId) {
+        this.roleId = roleId;
+        this.permissionId = permissionId;
+    }
+
+    public RolePermission() {
+    }
 }
