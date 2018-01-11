@@ -33,7 +33,7 @@ public class UserController {
         return userService.addUser(user);
     }
 
-    @PostMapping(value = "/login")
+    @PostMapping(value = "/signin")
     public RestResp login(@RequestBody UserVO user){
         return userService.login(user);
     }

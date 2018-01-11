@@ -17,7 +17,7 @@ public class RegexUtils {
     public static final String REGEX_ZH="^[\\u0391-\\uFFE5]+$";
     public static final String REGEX_URL="^((http|https)://)?([\\w-]+\\.)+[\\w-]+(/[\\w-./?%&=]*)?$ ";
     public static final String REGEX_NAME = "^[a-zA-Z][a-zA-Z_0-9]*$";
-    public static final String REGEX_NAME_LEN32 = "^[a-zA-Z][a-zA-Z_0-9]{5,31}$";
+    public static final String REGEX_NAME_LEN32 = "^[a-zA-Z][a-zA-Z_0-9]{4,31}$";
     public static final String REGEX_BTC_ADDRESS = "^[a-zA-Z0-9]${25,33}";
 
     public static boolean match(String str ,String regex){

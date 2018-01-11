@@ -57,4 +57,22 @@ public class UserVO extends User {
         }
         return null;
     }
+
+    public User userVO2User(){
+        if(null != this){
+            User user = new User();
+            user.setId(this.getId());
+            user.setUsername(this.getUsername());
+            user.setLoginname(this.getLoginname());
+            user.setMobilephone(this.getMobilephone());
+            user.setEmail(this.getEmail());
+            user.setPassword(this.getPassword());
+            user.setEnabled(this.getEnabled());
+            user.setImage(this.getImage());
+            user.setDescription(this.getDescription());
+
+            return user;
+        }
+        return null;
+    }
 }

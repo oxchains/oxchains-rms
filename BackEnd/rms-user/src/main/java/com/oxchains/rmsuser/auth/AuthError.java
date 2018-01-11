@@ -21,7 +21,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 /**
  * @author aiet
  */
-@Component
+//@Component
 public class AuthError implements AuthenticationEntryPoint, AccessDeniedHandler {
 
     @Override

@@ -39,51 +39,51 @@ public class UserService {
     MailService mailService;
 
 
-    public RestResp addUser(UserVO user) {
+    public RestResp addUser(UserVO userVO) {
         boolean mail = false;
-        if(null == user){
+        if(null == userVO){
             return RestResp.fail("请正确提交的注册信息");
         }
-        if(null == user.getLoginname() || !RegexUtils.match(user.getLoginname(),RegexUtils.REGEX_NAME_LEN32)){
+        if(null == userVO.getLoginname() || !RegexUtils.match(userVO.getLoginname(),RegexUtils.REGEX_NAME_LEN32)){
             return RestResp.fail("请正确填写登录名，只能包含字母、数字、下划线，且只能以字母开头");
         }
-        if(null != user.getMobilephone()){
-            if(!RegexUtils.match(user.getMobilephone(),RegexUtils.REGEX_MOBILEPHONE)){
+        if(null != userVO.getMobilephone()){
+            if(!RegexUtils.match(userVO.getMobilephone(),RegexUtils.REGEX_MOBILEPHONE)){
                 return RestResp.fail("请正确填写手机号");
             }
         }
-        if(null != user.getEmail()){
-            if(!RegexUtils.match(user.getEmail(),RegexUtils.REGEX_EMAIL)){
+        if(null != userVO.getEmail()){
+            if(!RegexUtils.match(userVO.getEmail(),RegexUtils.REGEX_EMAIL)){
                 return RestResp.fail("请正确填写邮箱地址");
             }
-            user.setEnabled(Status.EnableStatus.UNENABLED.getStatus());
+            userVO.setEnabled(Status.EnableStatus.UNENABLED.getStatus());
             mail = true;
         }else {
-            user.setEnabled(Status.EnableStatus.ENABLED.getStatus());
+            userVO.setEnabled(Status.EnableStatus.ENABLED.getStatus());
         }
-        Optional<User> optional = getUser(user);
+        Optional<User> optional = getUser(userVO);
         if (optional.isPresent()) {
             User u = optional.get();
-            if(null != user.getLoginname() && user.getLoginname().equals(u.getLoginname())){
+            if(null != userVO.getLoginname() && userVO.getLoginname().equals(u.getLoginname())){
                 return RestResp.fail("用户名已经存在");
             }
-            if(null != user.getMobilephone() && user.getMobilephone().equals(u.getMobilephone())){
+            if(null != userVO.getMobilephone() && userVO.getMobilephone().equals(u.getMobilephone())){
                 return RestResp.fail("该手机号已被注册");
             }
-            if(null != user.getEmail() && user.getEmail().equals(u.getEmail())){
+            if(null != userVO.getEmail() && userVO.getEmail().equals(u.getEmail())){
                 return RestResp.fail("该邮箱已被注册");
             }
             return RestResp.fail("注册用户已经存在");
         }
-        if(null==user.getPassword() || "".equals(user.getPassword().trim())){
+        if(null==userVO.getPassword() || "".equals(userVO.getPassword().trim())){
             return RestResp.fail("请正确填写登录密码");
         }
-        user.setPassword(EncryptUtils.encodeSHA256(user.getPassword()));
-        if(null == user.getCreateTime()){
-            user.setCreateTime(DateUtil.getPresentDate());
+        userVO.setPassword(EncryptUtils.encodeSHA256(userVO.getPassword()));
+        if(null == userVO.getCreateTime()){
+            userVO.setCreateTime(DateUtil.getPresentDate());
         }
 
-        user = userRepo.save(user);
+        User user = userRepo.save(userVO.userVO2User());
         if (user == null) {
             return RestResp.fail("操作失败");
         }

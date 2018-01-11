@@ -1,14 +1,21 @@
 package com.oxchains.rmsuser;
 
+import com.oxchains.rmsuser.auth.OXLogoutSuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+
+import javax.annotation.Resource;
 
 /**
  * @author ccl
@@ -18,35 +25,33 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @Configuration
 public class ApplicationConfiguration extends WebSecurityConfigurerAdapter {
 
-    //    private final JwtAuthenticationProvider jwtAuthenticationProvider;
-//    private final JwtTokenFilter jwtTokenFilter;
-//    private AuthError authError;
-//
-//    public UserApplicationConfiguration(@Autowired JwtTokenFilter jwtTokenFilter, @Autowired JwtAuthenticationProvider jwtAuthenticationProvider, @Autowired AuthError authError) {
-//        this.jwtTokenFilter = jwtTokenFilter;
-//        this.jwtAuthenticationProvider = jwtAuthenticationProvider;
-//        this.authError = authError;
-//    }
-
-    @Override
-    public void configure(HttpSecurity http) throws Exception {
-//        http.cors().and().csrf().disable().authorizeRequests().antMatchers("/user/*","/token","/account/*").permitAll()
-//                //.antMatchers("/user/phone").authenticated()
-//                .antMatchers("/**/*")
-//                .authenticated().and()
-//                .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
-//                .exceptionHandling()
-//                .authenticationEntryPoint(authError)
-//                .accessDeniedHandler(authError);
-        http.cors().and().csrf().disable().authorizeRequests().antMatchers("/**/*").permitAll();
-    }
-
-
-
+    /**
+     * 1. 配置认证管理器
+     * @param auth
+     * @throws Exception
+     */
     @Override
     protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
-        //auth.authenticationProvider(jwtAuthenticationProvider);
+        super.configure(auth);
     }
+
+    /**
+     * 配置安全策略
+     * @param http
+     * @throws Exception
+     */
+    @Override
+    public void configure(HttpSecurity http) throws Exception {
+        http.cors().and().csrf().disable()
+                .formLogin().loginPage("/login").permitAll()
+                .and()
+                .requestMatchers()
+                .antMatchers("/", "/login", "/oauth/authorize", "/oauth/confirm_access")
+                .and()
+                .authorizeRequests()
+                .anyRequest().authenticated();
+    }
+
 
     /**
      * allow cross origin requests
@@ -61,6 +66,12 @@ public class ApplicationConfiguration extends WebSecurityConfigurerAdapter {
                         .allowedOrigins("*")
                         .allowedMethods("GET", "POST", "PUT", "OPTIONS", "DELETE")
                         .allowedHeaders("*");
+            }
+
+            @Override
+            public void addViewControllers(ViewControllerRegistry registry) {
+                registry.addViewController("login").setViewName("login");
+                registry.addViewController("/").setViewName("index");
             }
         };
     }
